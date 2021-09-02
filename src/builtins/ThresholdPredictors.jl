@@ -4,28 +4,23 @@
 
 const THRESHOLD_SUPPORTED_ATOMS = (
     :Probabilistic,
-    :AbstractProbabilisticUnsupervisedDetector,
-    :AbstractProbabilisticSupervisedDetector)
+    :UnsupervisedProbabilistic)
 
 # Each supported atomic type gets its own wrapper:
 
 const type_given_atom = Dict(
     :Probabilistic =>
     :BinaryThresholdPredictor,
-    :AbstractProbabilisticUnsupervisedDetector =>
-    :ThresholdUnsupervisedDetector,
-    :AbstractProbabilisticSupervisedDetector =>
-    :ThresholdSupervisedDetector)
+    :UnsupervisedProbabilistic =>
+    :UnsupervisedBinaryThresholdPredictor)
 
 # ...which must have appropriate supertype:
 
 const super_given_atom = Dict(
     :Probabilistic =>
     :Deterministic,
-    :AbstractProbabilisticUnsupervisedDetector =>
-    :AbstractDeterministicUnsupervisedDetector,
-    :AbstractProbabilisticSupervisedDetector =>
-    :AbstractDeterministicSupervisedDetector)
+    :UnsupervisedProbabilistic =>
+    :UnsupervisedDeterministic)
 
 # the type definitions:
 
@@ -61,17 +56,12 @@ const ERR_MODEL_UNSPECIFIED = ArgumentError(
 """
     BinaryThresholdPredictor(model; threshold=0.5)
 
-Wrap the `Probabilistic` model, `model`, assumed to support binary
-classification, as a `Deterministic` model, by applying the specified
-`threshold` to the positive class probability. Can also be applied to
-outlier detection models that predict normalized scores - in the form
-of appropriate `UnivariateFinite` distributions - that is, models that
-subtype `AbstractProbabilisticUnsupervisedDetector` or
-`AbstractProbabilisticSupervisedDetector`.
+Wrap the `Probabilistic` or `UnsupervisedProbabilistic` model, `model`,
+assumed to support binary classification, as a `Deterministic` model,
+by applying the specified `threshold` to the positive class probability.
 
 By convention the positive class is the second class returned by
-`levels(y)`, where `y` is the target (the
-$(MLJModelInterface.OUTLIER)) class in the case of detection).
+`levels(y)`, where `y` is the target.
 
 If `threshold=0.5` then calling `predict` on the wrapped model is
 equivalent to calling `predict_mode` on the atomic model.
